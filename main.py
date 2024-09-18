@@ -1,4 +1,6 @@
 import os
+import tempfile
+
 
 # Only load the dotenv if the RAILWAY_ENVIRONMENT variable is not set
 if not os.environ.get("RAILWAY_ENVIRONMENT"):
@@ -40,33 +42,33 @@ async def root():
 ####################################################################################################
 @app.post("/api/v1/ocr")
 async def validate_mc(
-    oem: int = Form(...),  # OCR Engine Mode from form data
-    psm: int = Form(...),  # Page Segmentation Mode from form data
-    file: UploadFile = File(...),  # Accept the image file
+    oem: int = Form(...),
+    psm: int = Form(...),
+    file: UploadFile = File(...),
     _token: HTTPAuthorizationCredentials = Depends(verify_token),
 ):
     """
     Extract text from uploaded image with specified OCR configurations.
     """
-    # Save the uploaded file to a temporary location
-    input_image_path = f"temp/{file.filename}"
-    with open(input_image_path, "wb") as buffer:
-        buffer.write(await file.read())
-
-    # Process the image with Wand (adding a white border)
-    with Image(filename=input_image_path) as img:
+    # Read the uploaded image directly into memory
+    image_bytes = await file.read()
+    
+    # Use Wand to add a border to the image in memory
+    with Image(blob=image_bytes) as img:
         img.border(color=Color('white'), width=10, height=10)
-        new_filename = f"temp/{file.filename.split('.')[0]}_border.jpg"
-        img.save(filename=new_filename)
+        
+        # Convert Wand image back to bytes for further processing
+        img_byte_arr = io.BytesIO()
+        img.save(file=img_byte_arr)
+        img_byte_arr.seek(0)
+        processed_image_bytes = img_byte_arr.read()
 
-    print("Image processing complete.")
+    # Convert the processed image to OpenCV format
+    img_array = np.frombuffer(processed_image_bytes, np.uint8)
+    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
-    # Read the image with OpenCV
-    img = cv2.imread(new_filename)
-
-    # Use Tesseract for OCR with the specified oem and psm values
+    # Use Tesseract for OCR with the specified OEM and PSM values
     config = f"--oem {oem} --psm {psm}"
     tess_output = pytesseract.image_to_string(img, config=config)
-    print(tess_output)
 
     return {"extracted_text": tess_output}
