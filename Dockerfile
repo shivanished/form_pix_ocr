@@ -1,36 +1,33 @@
 FROM python:3.11-slim
 
-# Install ImageMagick
+# Install ImageMagick and Tesseract
 RUN apt-get update && apt-get install -y \
     imagemagick \
     libmagickwand-dev \
     tesseract-ocr \
     libtesseract-dev
 
-# Set up environment variables for ImageMagick
+# Set up environment variables
 ENV MAGICK_HOME="/usr"
 ENV LD_LIBRARY_PATH="$MAGICK_HOME/lib:$LD_LIBRARY_PATH"
-ENV PATH="$MAGICK_HOME/bin:$PATH"
-ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+ENV PATH="/usr/bin:$MAGICK_HOME/bin:$PATH"
+ENV TESSDATA_PREFIX="/usr/share/tesseract-ocr/4.00/tessdata"
 
-# Set the working directory
 WORKDIR /app
 
-# Create and activate a virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy requirements and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir hypercorn
 
-# Verify Hypercorn installation
+# Verify installations
 RUN which hypercorn || echo "Hypercorn not found in PATH"
+RUN which tesseract
+RUN ls -l /usr/bin/tesseract
 RUN tesseract --version
 
-# Copy the application code
 COPY . .
 
-# Command to run your FastAPI application
 CMD ["/opt/venv/bin/hypercorn", "main:app", "--bind", "0.0.0.0:8000"]
