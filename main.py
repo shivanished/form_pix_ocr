@@ -10,7 +10,6 @@ import json
 import aiohttp
 import cv2
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 from fastapi import Depends, FastAPI, status, Request, HTTPException, File, UploadFile, Form
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.responses import JSONResponse
