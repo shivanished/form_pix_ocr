@@ -1,6 +1,7 @@
 import requests
 
 url = "http://127.0.0.1:9001/api/v1/ocr"
+# url = "https://formpixocr-production.up.railway.app/api/v1/ocr"
 
 image_path = "assets/stock_sheet.jpg"
 
