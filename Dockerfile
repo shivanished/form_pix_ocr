@@ -1,11 +1,13 @@
 FROM python:3.11-slim
+ENV PYTHONUNBUFFERED=1
 
 # Install ImageMagick and Tesseract
 RUN apt-get update && apt-get install -y \
     imagemagick \
     libmagickwand-dev \
     tesseract-ocr \
-    libtesseract-dev
+    libtesseract-dev \
+    tesseract-ocr-eng
 
 # Set up environment variables
 ENV MAGICK_HOME="/usr"
@@ -29,5 +31,8 @@ RUN ls -l /usr/bin/tesseract
 RUN tesseract --version
 
 COPY . .
+
+# Update Tesseract path in main.py
+RUN sed -i 's|r'/opt/homebrew/bin/tesseract'|'/usr/bin/tesseract'|g' main.py
 
 CMD ["/opt/venv/bin/hypercorn", "main:app", "--bind", "0.0.0.0:8000"]
