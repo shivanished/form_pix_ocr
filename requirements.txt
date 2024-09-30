@@ -6,5 +6,7 @@ pytesseract==0.3.13
 python-dotenv==1.0.1
 Requests==2.32.3
 rich==13.8.1
-starlette==0.39.1
+starlette==0.38.0
 Wand==0.6.13
+numpy==1.26.4
+python-multipart==-0.0.12

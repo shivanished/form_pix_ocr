@@ -16,9 +16,10 @@ from starlette.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from wand.image import Image
 from wand.color import Color
+import io
+import numpy as np
 
 from logging_config import setup_logging
-from config import FMCSA_API_KEY
 from auth import verify_token
 from classes import CarrierRequest
 
