@@ -3,12 +3,15 @@ FROM python:3.11-slim
 # Install ImageMagick
 RUN apt-get update && apt-get install -y \
     imagemagick \
-    libmagickwand-dev
+    libmagickwand-dev \
+    tesseract-ocr \
+    libtesseract-dev
 
 # Set up environment variables for ImageMagick
 ENV MAGICK_HOME="/usr"
 ENV LD_LIBRARY_PATH="$MAGICK_HOME/lib:$LD_LIBRARY_PATH"
 ENV PATH="$MAGICK_HOME/bin:$PATH"
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
 
 # Set the working directory
 WORKDIR /app
@@ -24,6 +27,7 @@ RUN pip install --no-cache-dir hypercorn
 
 # Verify Hypercorn installation
 RUN which hypercorn || echo "Hypercorn not found in PATH"
+RUN tesseract --version
 
 # Copy the application code
 COPY . .
