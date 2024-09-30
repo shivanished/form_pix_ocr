@@ -14,13 +14,12 @@ ENV PATH="$MAGICK_HOME/bin:$PATH"
 WORKDIR /app
 
 # Create and activate a virtual environment
-RUN python -m venv venv
-ENV PATH="/app/venv/bin:$PATH"
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy requirements and install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && pip list
-RUN pip install hypercorn
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY . .
