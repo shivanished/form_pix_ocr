@@ -20,9 +20,13 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy requirements and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir hypercorn
+
+# Verify Hypercorn installation
+RUN which hypercorn || echo "Hypercorn not found in PATH"
 
 # Copy the application code
 COPY . .
 
 # Command to run your FastAPI application
-CMD ["hypercorn", "main:app", "--bind", "0.0.0.0:8000"]
+CMD ["/opt/venv/bin/hypercorn", "main:app", "--bind", "0.0.0.0:8000"]
