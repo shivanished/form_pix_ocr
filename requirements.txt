@@ -9,4 +9,4 @@ rich==13.8.1
 starlette==0.38.0
 Wand==0.6.13
 numpy==1.26.4
-python-multipart==-0.0.12
+python-multipart==0.0.12
