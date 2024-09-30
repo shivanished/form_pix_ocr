@@ -50,24 +50,19 @@ async def extract_text(
     """
     Extract text from uploaded image with specified OCR configurations.
     """
-    # Read the uploaded image directly into memory
     image_bytes = await file.read()
     
-    # Use Wand to add a border to the image in memory
     with Image(blob=image_bytes) as img:
         img.border(color=Color('white'), width=10, height=10)
         
-        # Convert Wand image back to bytes for further processing
         img_byte_arr = io.BytesIO()
         img.save(file=img_byte_arr)
         img_byte_arr.seek(0)
         processed_image_bytes = img_byte_arr.read()
 
-    # Convert the processed image to OpenCV format
     img_array = np.frombuffer(processed_image_bytes, np.uint8)
     img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
-    # Use Tesseract for OCR with the specified OEM and PSM values
     config = f"--oem {oem} --psm {psm}"
     tess_output = pytesseract.image_to_string(img, config=config)
 
