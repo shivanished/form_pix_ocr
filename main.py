@@ -32,7 +32,7 @@ logger = setup_logging()
 app = FastAPI()
 
 origins = [
-    "chrome-extension://caeiedadonhaaiilhcccnfnpghgijegk"  
+    "chrome-extension://caeiedadonhaaiilhcccnfnpghgijegk"  #image-variable extension
 ]
 
 app.add_middleware(
