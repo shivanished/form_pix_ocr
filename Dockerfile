@@ -1,7 +1,9 @@
-FROM python:3.11
+FROM python:3.12
 
 ENV PYTHONUNBUFFERED=1
-ENV TESSERACT_CMD=/usr/bin/tesseract
+ENV VIRTUAL_ENV=/opt/venv
+RUN python -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN apt-get update && apt-get install -y \
     imagemagick \
@@ -22,18 +24,15 @@ ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
 
 WORKDIR /app
 
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir hypercorn
+RUN pip install -r requirements.txt
+RUN pip install hypercorn
 
+RUN which python
+RUN python --version
+RUN echo $PATH
 RUN which tesseract
 RUN tesseract --version
-RUN tesseract --list-langs
-RUN ls -l $(which tesseract)
-RUN ldd $(which tesseract)
 
 COPY . .
 
