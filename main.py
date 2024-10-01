@@ -14,6 +14,7 @@ import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract' # when hosting
 from fastapi import Depends, FastAPI, status, Request, HTTPException, File, UploadFile, Form
 from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from wand.image import Image
@@ -30,6 +31,17 @@ logger = setup_logging()
 
 app = FastAPI()
 
+origins = [
+    "chrome-extension://caeiedadonhaaiilhcccnfnpghgijegk"  
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 ####################################################################################################
 # Root endpoint
