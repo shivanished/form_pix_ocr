@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 ENV MAGICK_HOME="/usr"
 ENV LD_LIBRARY_PATH="$MAGICK_HOME/lib:$LD_LIBRARY_PATH"
 ENV PATH="/usr/bin:$MAGICK_HOME/bin:$PATH"
-ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 WORKDIR /app
 
@@ -29,10 +29,14 @@ RUN which hypercorn || echo "Hypercorn not found in PATH"
 RUN which tesseract
 RUN ls -l /usr/bin/tesseract
 RUN tesseract --version
+RUN ls -l $TESSDATA_PREFIX
 
 COPY . .
 
 # Update Tesseract path in main.py
 RUN sed -i 's|r'/opt/homebrew/bin/tesseract'|'/usr/bin/tesseract'|g' main.py
+
+# Verify Tesseract data
+RUN tesseract --list-langs
 
 CMD ["/opt/venv/bin/hypercorn", "main:app", "--bind", "0.0.0.0:8000"]
