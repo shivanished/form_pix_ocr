@@ -21,15 +21,20 @@ from wand.image import Image
 from wand.color import Color
 import io
 import numpy as np
-
+from openai import OpenAI
 from logging_config import setup_logging
 from auth import verify_token
 from classes import CarrierRequest
 
 
 logger = setup_logging()
-
 app = FastAPI()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    raise ValueError("OpenAI API key is not set. Please set the OPENAI_API_KEY environment variable.")
+client = OpenAI(api_key=openai_api_key)
+
+
 
 origins = [
     "chrome-extension://caeiedadonhaaiilhcccnfnpghgijegk"  #image-variable extension
@@ -54,7 +59,7 @@ async def root():
 ####################################################################################################
 # OCR
 ####################################################################################################
-@app.post("/api/v1/ocr")
+@app.post("/api/ocr")
 async def extract_text(
     oem: int = Form(...),
     psm: int = Form(...),
@@ -66,11 +71,11 @@ async def extract_text(
     """
     # Read the uploaded image directly into memory
     image_bytes = await file.read()
-    
+
     # Use Wand to add a border to the image in memory
     with Image(blob=image_bytes) as img:
         img.border(color=Color('white'), width=10, height=10)
-        
+
         # Convert Wand image back to bytes for further processing
         img_byte_arr = io.BytesIO()
         img.save(file=img_byte_arr)
@@ -86,3 +91,6 @@ async def extract_text(
     tess_output = pytesseract.image_to_string(img, config=config)
 
     return {"extracted_text": tess_output}
+
+
+

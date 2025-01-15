@@ -1,7 +1,7 @@
 import requests
 
-# url = "http://127.0.0.1:9001/api/v1/ocr"
-url = "https://formpixocr-production.up.railway.app/api/v1/ocr"
+local_url = "http://127.0.0.1:9001/api/ocr"
+railway_url = "https://formpixocr-production.up.railway.app/api/v1/ocr"
 
 image_path = "assets/stock_sheet.jpg"
 
@@ -22,7 +22,7 @@ with open(image_path, "rb") as image_file:
         "Authorization": token,
     }
 
-    response = requests.post(url, data=data, files=files, headers=headers)
+    response = requests.post(local_url, data=data, files=files, headers=headers)
 
     if response.status_code == 200:
         print("Extracted Text:", response.json()["extracted_text"])
