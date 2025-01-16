@@ -1,7 +1,7 @@
 import requests
 
 local_url = "http://127.0.0.1:9001/api/ocr"
-railway_url = "https://formpixocr-production.up.railway.app/api/v1/ocr"
+railway_url = "https://formpixocr-production.up.railway.app/api/ocr"
 
 image_path = "assets/stock_sheet.jpg"
 

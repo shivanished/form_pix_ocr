@@ -10,30 +10,32 @@ import json
 import aiohttp
 import cv2
 import pytesseract
-# pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract' # when running on local machine
-pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract' # when hosting
+import signal
 from fastapi import Depends, FastAPI, status, Request, HTTPException, File, UploadFile, Form
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from starlette.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from wand.image import Image
 from wand.color import Color
 import io
 import numpy as np
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 from logging_config import setup_logging
 from auth import verify_token
 from classes import CarrierRequest
 
+
+pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract' # when running on local machine
+# pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract' # when hosting
 
 logger = setup_logging()
 app = FastAPI()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
     raise ValueError("OpenAI API key is not set. Please set the OPENAI_API_KEY environment variable.")
-client = OpenAI(api_key=openai_api_key)
-
+client = AsyncOpenAI(api_key=openai_api_key)
 
 
 origins = [
@@ -69,24 +71,19 @@ async def extract_text(
     """
     Extract text from uploaded image with specified OCR configurations.
     """
-    # Read the uploaded image directly into memory
     image_bytes = await file.read()
 
-    # Use Wand to add a border to the image in memory
     with Image(blob=image_bytes) as img:
         img.border(color=Color('white'), width=10, height=10)
 
-        # Convert Wand image back to bytes for further processing
         img_byte_arr = io.BytesIO()
         img.save(file=img_byte_arr)
         img_byte_arr.seek(0)
         processed_image_bytes = img_byte_arr.read()
 
-    # Convert the processed image to OpenCV format
     img_array = np.frombuffer(processed_image_bytes, np.uint8)
     img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
-    # Use Tesseract for OCR with the specified OEM and PSM values
     config = f"--oem {oem} --psm {psm}"
     tess_output = pytesseract.image_to_string(img, config=config)
 
@@ -94,3 +91,47 @@ async def extract_text(
 
 
 
+####################################################################################################
+# OpenAI Call
+####################################################################################################
+@app.post("/api/openai")
+async def extract_text(
+    prompt: str,
+    _token: HTTPAuthorizationCredentials = Depends(verify_token),
+):
+    """
+    OpenAI chat streaming API for chat (temporarily until I train a custom LLM)
+    """
+    async def generate_openai_stream(prompt: str):
+        completion = await client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            stream=True
+        )
+
+        def signal_handler(sig, frame):
+            print("\nStopping the stream...")
+            raise KeyboardInterrupt
+
+        signal.signal(signal.SIGINT, signal_handler)
+
+
+        # async for chunk in completion:
+        #     if chunk.choices[0].delta.content is not None:
+        #         yield chunk.choices[0].delta.content
+
+        try:
+            async for chunk in completion:
+                if chunk.choices[0].delta.content is not None:
+                    yield chunk.choices[0].delta.content
+        except KeyboardInterrupt:
+            print("\nStream stopped by user.")
+        finally:
+            print("\nStream ended.")
+    
+    return StreamingResponse(generate_openai_stream(prompt), media_type="text/event-stream")
+    
+    
