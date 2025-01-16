@@ -27,8 +27,8 @@ from auth import verify_token
 from classes import CarrierRequest
 
 
-pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract' # when running on local machine
-# pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract' # when hosting
+# pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract' # when running on local machine
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract' # when hosting
 
 logger = setup_logging()
 app = FastAPI()
@@ -112,25 +112,10 @@ async def extract_text(
             stream=True
         )
 
-        def signal_handler(sig, frame):
-            print("\nStopping the stream...")
-            raise KeyboardInterrupt
-
-        signal.signal(signal.SIGINT, signal_handler)
-
-
-        # async for chunk in completion:
-        #     if chunk.choices[0].delta.content is not None:
-        #         yield chunk.choices[0].delta.content
-
-        try:
-            async for chunk in completion:
-                if chunk.choices[0].delta.content is not None:
-                    yield chunk.choices[0].delta.content
-        except KeyboardInterrupt:
-            print("\nStream stopped by user.")
-        finally:
-            print("\nStream ended.")
+        async for chunk in completion:
+            if chunk.choices[0].delta.content is not None:
+                yield chunk.choices[0].delta.content
+       
     
     return StreamingResponse(generate_openai_stream(prompt), media_type="text/event-stream")
     
