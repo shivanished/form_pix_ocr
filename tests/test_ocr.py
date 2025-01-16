@@ -22,7 +22,7 @@ with open(image_path, "rb") as image_file:
         "Authorization": token,
     }
 
-    response = requests.post(local_url, data=data, files=files, headers=headers)
+    response = requests.post(railway_url, data=data, files=files, headers=headers)
 
     if response.status_code == 200:
         print("Extracted Text:", response.json()["extracted_text"])

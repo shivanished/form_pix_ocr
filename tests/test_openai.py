@@ -16,7 +16,7 @@ headers = {
     "Accept": "text/event-stream"
 }
 
-response = requests.post(local_url, params=params, headers=headers, stream=True)
+response = requests.post(railway_url, params=params, headers=headers, stream=True)
 
 if response.status_code == 200:
    for chunk in response.iter_content(chunk_size=None, decode_unicode=True):
