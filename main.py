@@ -87,7 +87,10 @@ async def extract_text(
     config = f"--oem {oem} --psm {psm}"
     tess_output = pytesseract.image_to_string(img, config=config)
 
-    return {"extracted_text": tess_output}
+    response = {"extracted_text": tess_output}
+    logger.info(response)
+
+    return response
 
 
 
