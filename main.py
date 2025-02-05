@@ -39,6 +39,7 @@ client = AsyncOpenAI(api_key=openai_api_key)
 
 
 origins = [
+    "https://www.shivanshsoni.com",
     "chrome-extension://caeiedadonhaaiilhcccnfnpghgijegk"  #image-variable extension
 ]
 
