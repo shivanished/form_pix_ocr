@@ -1,7 +1,7 @@
 import requests
-import sseclient
+# import sseclient
 
-local_url = "http://127.0.0.1:9001/api/openai"
+# local_url = "http://127.0.0.1:9001/api/openai"
 railway_url = "https://formpixocr-production.up.railway.app/api/openai"
 
 token = "Bearer AIzaSyClzfrOzB818x55FASHvX4JuGQciR9lv7q"
