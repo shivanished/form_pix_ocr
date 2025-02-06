@@ -72,6 +72,7 @@ async def extract_text(
     """
     Extract text from uploaded image with specified OCR configurations.
     """
+    logger.info("Recieved OCR Request")
     image_bytes = await file.read()
 
     with Image(blob=image_bytes) as img:
@@ -106,6 +107,7 @@ async def extract_text(
     """
     OpenAI chat streaming API for chat (temporarily until I train a custom LLM)
     """
+    logger.info("Recieved LLM Request")
     async def generate_openai_stream(prompt: str):
         completion = await client.chat.completions.create(
             model="gpt-4",
