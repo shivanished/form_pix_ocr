@@ -123,7 +123,7 @@ async def extract_text(
         async for chunk in completion:
             if chunk.choices[0].delta.content is not None:
                 response_content = chunk.choices[0].delta.content
-                logger.info(f"OpenAI response chunk: {response_content}")
+                # logger.info(f"OpenAI response chunk: {response_content}")
                 yield response_content
     
     return StreamingResponse(generate_openai_stream(prompt), media_type="text/event-stream")
