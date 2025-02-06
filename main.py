@@ -107,7 +107,9 @@ async def extract_text(
     """
     OpenAI chat streaming API for chat (temporarily until I train a custom LLM)
     """
-    logger.info("Recieved LLM Request")
+    logger.info("Received LLM Request")
+    logger.info(f"Request payload: prompt={prompt}")
+
     async def generate_openai_stream(prompt: str):
         completion = await client.chat.completions.create(
             model="gpt-4",
@@ -123,8 +125,6 @@ async def extract_text(
                 response_content = chunk.choices[0].delta.content
                 logger.info(f"OpenAI response chunk: {response_content}")
                 yield response_content
-    
-    logger.info(f"Received prompt: {prompt}")
     
     return StreamingResponse(generate_openai_stream(prompt), media_type="text/event-stream")
 
